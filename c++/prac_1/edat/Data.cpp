@@ -93,11 +93,18 @@ bool Data::es_data_valida(int dia, int mes, int any)
 	return correcte;
 }
 
-bool Data::aniversari(const Data& d1 d2) const{
+bool Data::aniversari(Data data1, Data data2){
+	int any1=data1.a_any;
+
+	if ((data1.a_dia==data2.a_dia) || (data1.a_mes==data2.a_mes))
+	{
+		return true;
+	}
+	
 	
 
 }
-int Data::edat_actual(const Data& d) const {
-	int any = d.a_any;
+//int Data::edat_actual(const Data& d) const {
+//	int any = d.a_any;
 	
-}
+//}

@@ -39,6 +39,7 @@ private:
 	static bool es_data_valida(int dia, int mes, int any);
 	// Pre: cert;
 	// Post: retorna cert si dia/mes/any formen una data vàlida en el calendari gregorià(entre els any 1600 i 4000)
+	static bool aniversari(Data data1,Data data2);
 };
 
 #endif // data
