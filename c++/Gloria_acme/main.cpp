@@ -8,6 +8,8 @@ using namespace std;
 int posicio_poble;
 int posicio_comarca;
 const int numero_incidencies_max=50;
+const int numero_pobles_max=200;
+const int numero_comarques_maxim=50;
 
 //structura que conte les dades d'una poblacio
 struct poble 
@@ -27,55 +29,55 @@ struct poble
 struct comarca
 {
     string nom_comarca;
-    poble pobles[200];
+    poble pobles[numero_pobles_max];
     
 };
 
-comarca comarques[50];
+comarca comarques[numero_comarques_maxim];
 
 
 //FUNCIONS
-void guardar_pluja_neu(bool poble_nou,char lletra,int dada){
+void guardar_pluja_neu(char lletra,int dada){
+  //Pre: lletra introduida i dada
+  //Pos: suma el valor de neu o pluja al poble corresponent
   if (lletra=='p' || lletra=='P')
   {
-    if (poble_nou==true)
-    {
-      comarques[posicio_comarca].pobles[posicio_poble].pluja=dada;
-    }
-    else if(poble_nou==false)
-    {
-      comarques[posicio_comarca].pobles[posicio_poble].pluja=dada+comarques[posicio_comarca].pobles[posicio_poble].pluja;
-    }    
+      comarques[posicio_comarca].pobles[posicio_poble].pluja+=dada;
   }
-  if (lletra=='n' || lletra=='N')
+  else if (lletra=='n' || lletra=='N')
   {
-    if (poble_nou)
-    {
-      comarques[posicio_comarca].pobles[posicio_poble].neu=dada;
-    }
-    else
-    {
-      comarques[posicio_comarca].pobles[posicio_poble].neu=+dada;
-    }   
+      comarques[posicio_comarca].pobles[posicio_poble].neu+=dada;
   }
 };
 
 void guardar_vent(int dada,string dia,string hora){
-  if (comarques[posicio_comarca].pobles[posicio_poble].vent<dada)
+  //Pre: cantitat de vent,dia i hora del vent
+  //Pos: si la dada es superior es guardar si no s'ignora
+    if (comarques[posicio_comarca].pobles[posicio_poble].vent<dada)
   {
     comarques[posicio_comarca].pobles[posicio_poble].vent=dada;
     comarques[posicio_comarca].pobles[posicio_poble].dia_vent=dia;
     comarques[posicio_comarca].pobles[posicio_poble].hora_vent=hora;
-  }
+  }   
   
 };
 
 void guardar_incidencia(string dada){
+  //Pre:incidencia
+  //Pos: gurada la incidencia en el primer lloc buit de l'array incidencies
+  if (comarques[posicio_comarca].pobles[posicio_poble].n_incidencies<numero_incidencies_max)
+  {
     comarques[posicio_comarca].pobles[posicio_poble].incidencies[comarques[posicio_comarca].pobles[posicio_poble].n_incidencies]=dada;
     comarques[posicio_comarca].pobles[posicio_poble].n_incidencies++;
+  }
+  else
+  {
+    cout << "la taula incidencies esta plena, no es poden afegir mes registres" << endl;
+  }  
+  
 };
 
-void menu_afegir_dades(bool poble_nou){
+void menu_afegir_dades(){
   char lletra_menu;
   int dada;
   string dia;
@@ -90,7 +92,7 @@ void menu_afegir_dades(bool poble_nou){
     {
       cout << "Dada:" << endl;
       cin >> dada;
-      guardar_pluja_neu(poble_nou,lletra_menu,dada);
+      guardar_pluja_neu(lletra_menu,dada);
     }
     else if (lletra_menu=='v' || lletra_menu=='V')
     {
@@ -113,7 +115,6 @@ void menu_afegir_dades(bool poble_nou){
 }
 
 void guardar_poble_ordenadament(string temp_poble){
-    bool poble_nou;
     //Pre:	0<=v.n<=MAX,	v.t[0..v.n-1]	ordenat	creixentment	
     //Post:	retorna	la	posició	on	s’ha	trobat		x	a		v.t[0..v.n-1],	o	-1	si	no	existeix.	
     int mig, esq=0, dreta=(sizeof(comarques[posicio_comarca].pobles)/sizeof(comarques[posicio_comarca].pobles[0]))-1;
@@ -126,20 +127,28 @@ void guardar_poble_ordenadament(string temp_poble){
     }
     if (trobat) {
       //retornem la posicio on l'hem trobat
-      posicio_poble=mig-1;
-      menu_afegir_dades(false);      
+      posicio_poble=mig;
+      menu_afegir_dades();      
     }
     else {
       int i = 0;
-      while (i<esq-1)
+      if (comarques[posicio_comarca].pobles[0].nom_poble!="")
+      {
+        cout << "El Registre de pobles esta ple, no es poden afegir nous pobles en aquesta comarca" << endl;
+      }
+      else
+      {
+        while (i<esq-1)
       {
         comarques[posicio_comarca].pobles[i]=comarques[posicio_comarca].pobles[i+1];
         i++;
       }
-      comarques[posicio_comarca].pobles[esq-1].nom_poble=temp_poble;
-      
+      comarques[posicio_comarca].pobles[esq-1]={};
+      comarques[posicio_comarca].pobles[esq-1].nom_poble=temp_poble;      
       posicio_poble=esq-1;
-      menu_afegir_dades(true);
+      menu_afegir_dades();
+      }  
+      
     }
 };
 
@@ -161,14 +170,24 @@ int guardar_comarca_ordenadament(string temp_poble,string temp_comarca){
     }
     else {
       int i = 0;
-      while (i<esq-1)
+      if (comarques[0].nom_comarca!="")
+        {
+          cout << "El Registre de Comarques esta ple, no es poden afegir noves comarques" << endl;
+        }
+      else
       {
-        comarques[i]=comarques[i+1];
-        i++;
+        while (i<esq-1)
+      {
+          comarques[i]=comarques[i+1];
+          i++;
       }
+      comarques[esq-1]={};
       comarques[esq-1].nom_comarca=temp_comarca;
       posicio_comarca=esq-1;
-      guardar_poble_ordenadament(temp_poble);     
+      guardar_poble_ordenadament(temp_poble);  
+      }
+      
+         
 
     }
   };
@@ -194,6 +213,60 @@ void introduccio_poblacio(){
   
 };
 
+void mostrar_dades(){
+      if (comarques[numero_comarques_maxim-1].nom_comarca!="")
+      {
+        for (int i = 0; i < numero_comarques_maxim; i++)
+        {
+          if (comarques[i].nom_comarca!="")
+          {
+            cout << comarques[i].nom_comarca << " ";
+            for (int x = 0; x < numero_pobles_max; x++)
+            {
+              if (comarques[i].pobles[x].nom_poble!="")
+              {
+                cout << comarques[i].pobles[x].nom_poble << ": ";
+                if (comarques[i].pobles[x].pluja!=0)
+                {
+                  cout << comarques[i].pobles[x].pluja << " l/m2 ";
+                }
+                if (comarques[i].pobles[x].neu!=0)
+                {
+                  cout << comarques[i].pobles[x].neu << " cm ";
+                }
+                if (comarques[i].pobles[x].vent!=0)
+                {
+                  cout << comarques[i].pobles[x].vent << " km/h ";
+                  cout << comarques[i].pobles[x].dia_vent << " - ";
+                  cout << comarques[i].pobles[x].hora_vent << " ";
+                }
+                if (comarques[i].pobles[x].incidencies[0]!="")
+                {
+                  cout << "--";   
+                  for (int z =0; z < numero_incidencies_max; z++)
+                  {
+                    if (comarques[i].pobles[x].incidencies[z]!="")
+                    {
+                      cout << comarques[i].pobles[x].incidencies[z];
+                    }
+                    else
+                    {
+                      break;
+                    }                 
+                  }
+                }               
+              }            
+          }    
+          cout << endl;    
+          }          
+        }
+      }
+      else
+      {
+        cout << "No hi ha incidents registrats" << endl;
+      }      
+};
+
 
 
 int main()
@@ -214,30 +287,7 @@ int main()
         introduccio_poblacio();
         break;
       case 'm': case 'M':
-        int count=50;
-        int counter_=200;
-        int count__=50;
-        for (int i = 45; i < count; i++)
-        {
-          cout << "comarca:" << comarques[i].nom_comarca << endl;
-          for (int x = 190; x < counter_; x++)
-          {
-            
-            cout << "   pobles:" << comarques[i].pobles[x].nom_poble << endl;
-            cout << "       pluja:" << comarques[i].pobles[x].pluja << endl;
-            cout << "       neu:" << comarques[i].pobles[x].neu << endl;
-            cout << "       vent:" << comarques[i].pobles[x].vent << endl;
-            cout << "          dia:" << comarques[i].pobles[x].dia_vent << endl;
-            cout << "          hora:" << comarques[i].pobles[x].hora_vent << endl;
-            for (int z = 45; z < count__; z++)
-            {
-              cout << "     incidencia:" << comarques[i].pobles[x].incidencies[z] << endl;
-            }
-            
-          }
-          
-        }
-        
+        mostrar_dades();        
         break;
       //case 'c': case 'C':
     
